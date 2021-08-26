@@ -2,11 +2,11 @@ use crate::discord::interaction::{
     InteractionApplicationCommandCallbackData, InteractionResponse, InteractionResponseType,
 };
 
-pub(crate) fn hello() -> InteractionResponse {
+pub(crate) fn ping() -> InteractionResponse {
     InteractionResponse {
         ty: InteractionResponseType::ChannelMessageWithSource,
         data: Some(InteractionApplicationCommandCallbackData {
-            content: "Hello, world!".to_string(),
+            content: "[Pong!](https://squid.pink/bot)".to_string(),
         }),
     }
 }

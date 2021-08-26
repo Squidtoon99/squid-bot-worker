@@ -1,4 +1,4 @@
-mod hello;
+mod ping;
 
 use crate::discord::interaction::{
     ApplicationCommandInteractionData, InteractionResponse, InteractionResponseType,
@@ -6,7 +6,7 @@ use crate::discord::interaction::{
 
 pub(crate) fn handle_command(data: &ApplicationCommandInteractionData) -> InteractionResponse {
     match data.name.as_str() {
-        "hello" => hello::hello(),
+        "ping" => ping::ping(),
         _ => InteractionResponse {
             ty: InteractionResponseType::ACKWithSource,
             data: None,
