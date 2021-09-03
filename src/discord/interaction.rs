@@ -1,8 +1,9 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, };
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::discord::command::handle_command;
 use crate::error::Error;
+use crate::context::Context;
 
 #[derive(Deserialize_repr)]
 #[repr(u8)]
@@ -22,9 +23,23 @@ pub(crate) enum InteractionResponseType {
     ACKWithSource = 5,
 }
 
-#[derive(Deserialize)]
+// #[derive(Deserialize)]
+// pub(crate) struct Member { 
+//     pub(crate) name: String,
+//     id: u64,
+    // deaf : bool,
+    // mute : bool,
+    // pending: bool,
+    //permissions: String,
+// }
+
+#[derive(Deserialize)]  
 pub(crate) struct ApplicationCommandInteractionData {
     pub(crate) name: String,
+    //id: u64,
+    // application_id: u64,
+    //member: Member,
+    //token : String,
 }
 
 #[derive(Serialize)]
@@ -56,13 +71,13 @@ pub(crate) struct InteractionResponse {
 }
 
 impl Interaction {
-    pub(crate) fn perform(&self) -> Result<InteractionResponse, Error> {
+    pub(crate) async fn perform(&self, context: &Context) -> Result<InteractionResponse, Error> {
         Ok(match self.ty {
             InteractionType::Ping => InteractionResponse {
                 ty: InteractionResponseType::Pong,
                 data: None,
             },
-            InteractionType::ApplicationCommand => handle_command(self.data()?),
+            InteractionType::ApplicationCommand => handle_command(context, self.data()?).await,
         })
     }
 }
