@@ -8,7 +8,6 @@ use error::Error as HttpError;
 use berror::Error;
 use reqwest::Method;
 use std::env;
-use crate::context::Context;
 pub type JsonMap = Map<String, Value>;
 
 pub use std::result::Result as StdResult;
@@ -17,8 +16,8 @@ pub use serde_json::{Map, Number, Value};
 pub type Result<T> = StdResult<T, Error>;
 
 
-pub fn api(url: String) -> String{
-    format!("https://gusc1-up-hedgehog-30142.upstash.io{}", url)
+pub fn api(uri: String, url: String) -> String{
+    format!("{}{}",uri, url)
 }
 
 

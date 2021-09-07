@@ -19,18 +19,25 @@ async function handleRequest(request) {
         }
 
         // noinspection JSUnresolvedVariable
+        const text = await request.text()
+        console.log(text);
+        const json = JSON.parse(text);
+        console.log(json.type);
         const context = {
             request: {
                 headers,
-                body: await request.text(),
+                body: text,
             },
             env: {
                 PUBLIC_KEY,
+                    UPSTASH_URI,
+                UPSTASH_TOKEN
             },
+            type: json.type
         };
-
-        const { status, body } = wasm_main(context);
-
+        console.log(context);
+        const { status, body } = await wasm_main(context);
+        console.log(status, body);
         return new Response(body, {
             status,
             headers: {

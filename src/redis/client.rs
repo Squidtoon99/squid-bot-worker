@@ -24,6 +24,7 @@ use super::{
 // }
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
+use serde::Deserialize;
 // use serde_json::json;
 // use std::env;
 
@@ -57,8 +58,14 @@ use serde_json::map::Map;
 //     }
 // }
 
+#[derive(Deserialize)]
+pub(crate) struct UpstashResponse {
+    pub(crate) result: Value
+}
+
 pub(crate) struct RedisClient {
     pub(crate) client: Arc<Client>,
+    pub uri: String,
     pub token: String,
 } 
 
@@ -72,17 +79,18 @@ impl fmt::Debug for RedisClient {
 }
 
 impl RedisClient {
-    pub fn new(token: String) -> Self {
+    pub fn new(uri: String, token: String) -> Self {
         let built = Client::builder().build().expect("Cannot build Reqwest::Client.");
         let client = Arc::new(built);
 
         RedisClient {
                 client,
+                uri,
                 token
             }     
     }
 
-    pub async fn get(&self, key: &str) -> Result<Map<String, Value>> {
+    pub async fn get(&self, key: &str) -> Result<UpstashResponse> {
         self.fire(Request {
             body: None,
             headers: None,
@@ -90,7 +98,7 @@ impl RedisClient {
         }).await
     }
 
-    pub async fn set(&self, key: &str, value: &str) -> Result<Map<String, Value>> {
+    pub async fn set(&self, key: &str, value: &str) -> Result<UpstashResponse> {
         self.fire(Request {
             body: None,
             headers: None,
@@ -106,7 +114,7 @@ impl RedisClient {
         }).await
     }
     pub async fn request(&self, req: Request<'_>) -> Result<ReqwestResponse> {
-        let request = req.build(&self.client, &self.token)?.build()?;
+        let request = req.build(&self.client, &self.uri, &self.token)?.build()?;
         let response = self.client.execute(request).await?; 
 
         if response.status().is_success() {

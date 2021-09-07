@@ -1,5 +1,4 @@
 use std::{
-    env,
     borrow::Cow
 };
 use super::{LightMethod, api};
@@ -16,16 +15,16 @@ use super::{LightMethod, api};
 pub enum Route{}
 
 impl Route {
-    pub fn get(key: &str) -> String {
-        api(format!("/get/{}", key))
+    pub fn get(uri: String, key: &str) -> String {
+        api(uri, format!("/get/{}", key))
     }
 
-    pub fn set(key: &str, value: &str) -> String {
-        api(format!("/set/{}/{}", key, value))
+    pub fn set(uri: String, key: &str, value: &str) -> String {
+        api(uri, format!("/set/{}/{}", key, value))
     }
 
-    pub fn incr(key: &str) -> String {
-        api(format!("/incr/{}", key))
+    pub fn incr(uri: String, key: &str) -> String {
+        api(uri, format!("/incr/{}", key))
     }
 
 }
@@ -48,19 +47,19 @@ pub(crate) enum RouteInfo<'a> {
 }
 
 impl <'a> RouteInfo<'a> {
-    pub fn deconstruct(&self) -> (LightMethod, Cow<'_, str>){
+    pub fn deconstruct(&self, uri: String) -> (LightMethod, Cow<'_, str>){
         match *self {
             RouteInfo::Set { key, value } => (
                 LightMethod::Post,
-                Cow::from(Route::set(key, value))
+                Cow::from(Route::set(uri, key, value))
             ),
             RouteInfo::Get { key } => (
                 LightMethod::Get,
-                Cow::from(Route::get(key))
+                Cow::from(Route::get(uri, key))
             ),
             RouteInfo::Incr { key } => (
                 LightMethod::Get,
-                Cow::from(Route::incr(key))
+                Cow::from(Route::incr(uri, key))
             )
         }
     }

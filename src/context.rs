@@ -1,16 +1,18 @@
 use serde::Deserialize;
-
+use std::env;
 use std::collections::HashMap;
-use crate::discord::interaction::Interaction;
+use crate::discord::interaction::{Interaction, ComponentInteraction};
 use crate::discord::verification::verify_signature;
 use crate::error::Error;
-use crate::http::{HttpError, HttpRequest, HttpResponse};
+use crate::http::{HttpRequest, HttpResponse};
 use crate::redis::client::RedisClient;
 
 #[derive(Deserialize)]
 pub(crate) struct Context {
     pub(crate) env: HashMap<String, String>,
     pub(crate) request: HttpRequest,
+    #[serde(rename="type")]
+    pub(crate) ty: u64
 }
 
 impl Context {
@@ -21,7 +23,7 @@ impl Context {
     }
 
     pub fn new_redis(&self) -> RedisClient {
-        RedisClient::new(String::from(self.env.get("UPSTASH_TOKEN").unwrap_or(&"".to_string())))
+        RedisClient::new(String::from(self.env.get("UPSTASH_URI").unwrap_or(&"".to_string())), String::from(self.env.get("UPSTASH_TOKEN").unwrap_or(&"".to_string())))
     }
     fn perform_verification(&self) -> Result<(), Error> {
         let public_key = self.env("PUBLIC_KEY")?;
@@ -34,9 +36,14 @@ impl Context {
 
     async fn handle_payload(&self) -> Result<String, Error> {
         let payload = &self.request.body;
-        let interaction =
-            serde_json::from_str::<Interaction>(payload).map_err(Error::JsonFailed)?;
-        let response = interaction.perform(&self).await?;
+        // for (key, value) in self.env.iter() {
+        //     env::set_var(key, value)
+        // };
+        let response = match self.ty {
+            3 => serde_json::from_str::<ComponentInteraction>(payload).map_err(Error::JsonFailed)?.perform(&self).await?,
+            _ => { serde_json::from_str::<Interaction>(payload).map_err(Error::JsonFailed)?.perform(&self).await? }
+        };
+            
 
         serde_json::to_string(&response).map_err(Error::JsonFailed)
     }

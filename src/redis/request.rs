@@ -81,6 +81,7 @@ impl<'a> Request<'a> {
     pub fn build(
         &'a self,
         client: &Arc<Client>,
+        uri: &str,
         token: &str
     ) -> Result<ReqwestRequestBuilder, HttpError> {
         let Request {
@@ -89,7 +90,7 @@ impl<'a> Request<'a> {
             route: ref route_info,
         } = *self;
 
-        let (method, path) = route_info.deconstruct();
+        let (method, path) = route_info.deconstruct(uri.to_string());
 
         let mut builder = client.request(method.reqwest_method(), Url::parse(&path)?);
 
@@ -116,29 +117,5 @@ impl<'a> Request<'a> {
         }
 
         Ok(builder.headers(headers))
-    }
-
-    pub fn body_ref(&self) -> &Option<&'a [u8]> {
-        &self.body
-    }
-
-    pub fn body_mut(&mut self) -> &mut Option<&'a [u8]> {
-        &mut self.body
-    }
-
-    pub fn headers_ref(&self) -> &Option<Headers> {
-        &self.headers
-    }
-
-    pub fn headers_mut(&mut self) -> &mut Option<Headers> {
-        &mut self.headers
-    }
-
-    pub fn route_ref(&self) -> &RouteInfo<'_> {
-        &self.route
-    }
-
-    pub fn route_mut(&mut self) -> &mut RouteInfo<'a> {
-        &mut self.route
     }
 }
