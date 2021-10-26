@@ -5,3 +5,5 @@ pkg/
 wasm-pack.log
 worker/generated/
 wrangler.toml
+*.rdb
+*.lock
