@@ -1,3 +1,4 @@
+use super::{routing::RouteInfo, HttpError};
 use reqwest::{
     header::{
         HeaderMap as Headers,
@@ -10,12 +11,8 @@ use reqwest::{
     Url,
 };
 use reqwest::{Client, RequestBuilder as ReqwestRequestBuilder};
-use tracing::instrument;
-use super::{
-    routing::RouteInfo,
-    HttpError
-};
 use std::sync::Arc;
+use tracing::instrument;
 
 pub(crate) struct RequestBuilder<'a> {
     body: Option<&'a [u8]>,
@@ -23,6 +20,7 @@ pub(crate) struct RequestBuilder<'a> {
     route: RouteInfo<'a>,
 }
 
+#[allow(dead_code)]
 impl<'a> RequestBuilder<'a> {
     pub fn new(route_info: RouteInfo<'a>) -> Self {
         Self {
@@ -82,7 +80,7 @@ impl<'a> Request<'a> {
         &'a self,
         client: &Arc<Client>,
         uri: &str,
-        token: &str
+        token: &str,
     ) -> Result<ReqwestRequestBuilder, HttpError> {
         let Request {
             body,
@@ -99,8 +97,10 @@ impl<'a> Request<'a> {
         }
 
         let mut headers = Headers::with_capacity(4);
-        headers
-            .insert(AUTHORIZATION, HeaderValue::from_str(token).map_err(HttpError::InvalidHeader)?);
+        headers.insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(token).map_err(HttpError::InvalidHeader)?,
+        );
 
         if self.body.is_some() {
             headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));

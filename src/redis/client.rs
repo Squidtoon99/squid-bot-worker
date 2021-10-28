@@ -4,30 +4,18 @@ use reqwest::{Client, Response as ReqwestResponse};
 //     StatusCode,
 //     Url,
 // };
-use std::{
-    sync::Arc,
-    fmt
-};
+use std::{fmt, sync::Arc};
 
-use super::{
-    request::Request,
-    routing::RouteInfo,
-    HttpError,
-    Error,
-    Result,
-    Value
-};
+use super::{request::Request, routing::RouteInfo, Error, HttpError, Result, Value};
 
 // pub(crate) struct RedisBuilder<'a> {
 //     token: Option<String>,
 //     client: Option<Arc<Client>>,
 // }
 use serde::de::DeserializeOwned;
-use serde_json::map::Map;
 use serde::Deserialize;
 // use serde_json::json;
 // use std::env;
-
 
 // impl<'a> RedisBuilder<'a> {
 //     fn _new() -> Self {
@@ -45,12 +33,12 @@ use serde::Deserialize;
 //         let token = token.as_ref().trim();
 
 //         let token = if token.starts_with("Bearer ") { token.to_string() } else {format!("Bearer {}", token) };
-        
+
 //         self.token = Some(token.clone());
 
 //         self
 //     }
-    
+
 //     pub fn client(mut self, client: Arc<Client>) -> Self {
 //         self.client = Some(client);
 
@@ -58,16 +46,16 @@ use serde::Deserialize;
 //     }
 // }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub(crate) struct UpstashResponse {
-    pub(crate) result: Value
+    pub(crate) result: Value,
 }
 
 pub(crate) struct RedisClient {
     pub(crate) client: Arc<Client>,
     pub uri: String,
     pub token: String,
-} 
+}
 
 impl fmt::Debug for RedisClient {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -78,49 +66,63 @@ impl fmt::Debug for RedisClient {
     }
 }
 
+#[allow(dead_code)]
 impl RedisClient {
     pub fn new(uri: String, token: String) -> Self {
-        let built = Client::builder().build().expect("Cannot build Reqwest::Client.");
+        let built = Client::builder()
+            .build()
+            .expect("Cannot build Reqwest::Client.");
         let client = Arc::new(built);
 
-        RedisClient {
-                client,
-                uri,
-                token
-            }     
+        RedisClient { client, uri, token }
     }
 
     pub async fn get(&self, key: &str) -> Result<UpstashResponse> {
         self.fire(Request {
             body: None,
             headers: None,
-            route: RouteInfo::Get {key }
-        }).await
+            route: RouteInfo::Get { key },
+        })
+        .await
     }
 
     pub async fn set(&self, key: &str, value: &str) -> Result<UpstashResponse> {
         self.fire(Request {
             body: None,
             headers: None,
-            route: RouteInfo::Set {key, value}
-        }).await
+            route: RouteInfo::Set { key, value },
+        })
+        .await
     }
 
-    pub async fn incr(&self, key: &str) -> Result<Map<String, Value>> {
+    pub async fn incr(&self, key: &str) -> Result<UpstashResponse> {
         self.fire(Request {
             body: None,
             headers: None,
-            route: RouteInfo::Incr {key}
-        }).await
+            route: RouteInfo::Incr { key },
+        })
+        .await
     }
+
+    pub async fn del(&self, key: &str) -> Result<UpstashResponse> {
+        self.fire(Request {
+            body: None,
+            headers: None,
+            route: RouteInfo::Del { key },
+        })
+        .await
+    }
+
     pub async fn request(&self, req: Request<'_>) -> Result<ReqwestResponse> {
         let request = req.build(&self.client, &self.uri, &self.token)?.build()?;
-        let response = self.client.execute(request).await?; 
+        let response = self.client.execute(request).await?;
 
         if response.status().is_success() {
             Ok(response)
         } else {
-            Err(Error::Http(Box::new(HttpError::from_response(response).await)))
+            Err(Error::Http(Box::new(
+                HttpError::from_response(response).await,
+            )))
         }
     }
 

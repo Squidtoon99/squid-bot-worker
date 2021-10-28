@@ -1,1 +1,3 @@
-pub(crate) mod math;
+mod math;
+
+pub(crate) use math::math;

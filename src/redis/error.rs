@@ -1,15 +1,13 @@
-
+use reqwest::Response;
+use reqwest::{header::InvalidHeaderValue, Error as ReqwestError, StatusCode, Url};
+use serde::de::{Deserialize, Deserializer, Error as DeError};
 use std::{
     error::Error as StdError,
     fmt::{Display, Formatter, Result as FmtResult},
 };
-use reqwest::{Error as ReqwestError, header::InvalidHeaderValue, StatusCode, Url};
-use reqwest::{ Response};
-use serde::de::{Deserialize, Deserializer, Error as DeError};
 
-
-use crate::redis::utils::deserialize_errors;
 use super::{JsonMap, StdResult};
+use crate::redis::utils::deserialize_errors;
 use url::ParseError as UrlError;
 
 #[derive(Clone, PartialEq, Debug)]
@@ -97,24 +95,14 @@ impl ErrorResponse {
 pub enum Error {
     /// When a non-successful status code was received for a request.
     UnsuccessfulRequest(ErrorResponse),
-    /// When the decoding of a ratelimit header could not be properly decoded
-    /// into an `i64` or `f64`.
-    RateLimitI64F64,
-    /// When the decoding of a ratelimit header could not be properly decoded
-    /// from UTF-8.
-    RateLimitUtf8,
     /// When parsing an URL failed due to invalid input.
     Url(UrlError),
     /// Header value contains invalid input.
     InvalidHeader(InvalidHeaderValue),
     /// Reqwest's Error contain information on why sending a request failed.
     Request(ReqwestError),
-    /// When using a proxy with an invalid scheme.
-    InvalidScheme,
-    /// When using a proxy with an invalid port.
-    InvalidPort,
 }
-
+#[allow(dead_code)]
 impl Error {
     // We need a freestanding from-function since we cannot implement an async
     // From-trait.
@@ -193,14 +181,10 @@ impl Display for Error {
                 }
 
                 Ok(())
-            },
-            Error::RateLimitI64F64 => f.write_str("Error decoding a header into an i64 or f64"),
-            Error::RateLimitUtf8 => f.write_str("Error decoding a header from UTF-8"),
+            }
             Error::Url(_) => f.write_str("Provided URL is incorrect."),
             Error::InvalidHeader(_) => f.write_str("Provided value is an invalid header value."),
             Error::Request(_) => f.write_str("Error while sending HTTP request."),
-            Error::InvalidScheme => f.write_str("Invalid Url scheme."),
-            Error::InvalidPort => f.write_str("Invalid port."),
         }
     }
 }

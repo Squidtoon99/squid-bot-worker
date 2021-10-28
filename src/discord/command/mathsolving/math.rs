@@ -1,20 +1,20 @@
-use crate::discord::interaction::{
-    InteractionApplicationCommandCallbackData, InteractionResponse, InteractionResponseType, Interaction};
 extern crate meval;
+use crate::discord::command::prelude::*;
 
-pub(crate) async fn math(data: &Interaction) -> InteractionResponse {
-    let interaction_data = data.data().unwrap();
-    let options = &interaction_data.options;
-    let expression = &options.first().unwrap().value.as_str().unwrap();
-    let result = match meval::eval_str(expression) {
-        Ok(result) => result.to_string(),
-        Err(_) => "I cannot solve that expression".to_string()
-    };
+pub(crate) async fn math(ctx: &ApplicationCommand) -> Result<InteractionResponse> {
+    if let CommandOptionValue::String(expression) = &ctx.data.options.first().unwrap().value {
+        let resp = match meval::eval_str(expression) {
+            Ok(result) => format!("= `{}`", result),
+            Err(e) => format!("I cannot solve that expression\n{:?}", e)
+        };
 
-    InteractionResponse {
-                ty: InteractionResponseType::ChannelMessageWithSource,
-                data: Some(InteractionApplicationCommandCallbackData {
-                    content: format!("{}", result),
-                }),
-            }
+        let a = EmbedAuthorBuilder::new().name(expression).build();
+        let e = EmbedBuilder::new().description(resp).author(a).build()?;
+
+        Ok(InteractionResponse::ChannelMessageWithSource(
+            CallbackDataBuilder::new().embeds([e]).build(),
+        ))
+    } else {
+        panic!("No equation passed from discord")
+    }
 }

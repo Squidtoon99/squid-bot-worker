@@ -5,13 +5,11 @@ use std::{
     num::ParseIntError,
 };
 
-
-
 use reqwest::{header::InvalidHeaderValue, Error as ReqwestError};
 use serde_json::Error as JsonError;
 use tracing::instrument;
 
-use super::{StdResult, Value, HttpError};
+use super::{HttpError, Value};
 
 /// The common result type between most library functions.
 ///
@@ -19,7 +17,6 @@ use super::{StdResult, Value, HttpError};
 /// type, rather than the usual 2 (`Result<T, Error>`). This is because all
 /// functions that return a result return serenity's [`Error`], so this is
 /// implied, and a "simpler" result is used.
-pub type Result<T> = StdResult<T, Error>;
 
 /// A common error enum returned by most of the library's functionality within a
 /// custom [`Result`].
@@ -77,7 +74,6 @@ impl From<FormatError> for Error {
     }
 }
 
-
 impl From<IoError> for Error {
     fn from(e: IoError) -> Error {
         Error::Io(e)
@@ -96,20 +92,17 @@ impl From<ParseIntError> for Error {
     }
 }
 
-
 impl From<HttpError> for Error {
     fn from(e: HttpError) -> Error {
         Error::Http(Box::new(e))
     }
 }
 
-
 impl From<InvalidHeaderValue> for Error {
     fn from(e: InvalidHeaderValue) -> Error {
         HttpError::InvalidHeader(e).into()
     }
 }
-
 
 impl From<ReqwestError> for Error {
     fn from(e: ReqwestError) -> Error {
@@ -129,7 +122,6 @@ impl Display for Error {
             Error::Num(inner) => fmt::Display::fmt(&inner, f),
             Error::Url(msg) => f.write_str(msg),
             Error::Http(inner) => fmt::Display::fmt(&inner, f),
-            
         }
     }
 }
@@ -142,7 +134,7 @@ impl StdError for Error {
             Error::Io(inner) => Some(inner),
             Error::Json(inner) => Some(inner),
             Error::Num(inner) => Some(inner),
-            
+
             Error::Http(inner) => Some(inner),
             _ => None,
         }

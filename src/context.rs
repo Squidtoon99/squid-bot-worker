@@ -1,18 +1,16 @@
-use serde::Deserialize;
-use std::env;
-use std::collections::HashMap;
-use crate::discord::interaction::{Interaction, ComponentInteraction};
+use crate::discord::handle_command;
 use crate::discord::verification::verify_signature;
 use crate::error::Error;
 use crate::http::{HttpRequest, HttpResponse};
 use crate::redis::client::RedisClient;
+use serde::Deserialize;
+use std::collections::HashMap;
+use twilight_model::application::{callback::InteractionResponse, interaction::Interaction};
 
 #[derive(Deserialize)]
 pub(crate) struct Context {
     pub(crate) env: HashMap<String, String>,
     pub(crate) request: HttpRequest,
-    #[serde(rename="type")]
-    pub(crate) ty: u64
 }
 
 impl Context {
@@ -23,7 +21,10 @@ impl Context {
     }
 
     pub fn new_redis(&self) -> RedisClient {
-        RedisClient::new(String::from(self.env.get("UPSTASH_URI").unwrap_or(&"".to_string())), String::from(self.env.get("UPSTASH_TOKEN").unwrap_or(&"".to_string())))
+        RedisClient::new(
+            String::from(self.env.get("UPSTASH_URI").unwrap_or(&"".to_string())),
+            String::from(self.env.get("UPSTASH_TOKEN").unwrap_or(&"".to_string())),
+        )
     }
     fn perform_verification(&self) -> Result<(), Error> {
         let public_key = self.env("PUBLIC_KEY")?;
@@ -39,24 +40,35 @@ impl Context {
         // for (key, value) in self.env.iter() {
         //     env::set_var(key, value)
         // };
-        let response = match self.ty {
-            3 => serde_json::from_str::<ComponentInteraction>(payload).map_err(Error::JsonFailed)?.perform(&self).await?,
-            _ => { serde_json::from_str::<Interaction>(payload).map_err(Error::JsonFailed)?.perform(&self).await? }
-        };
-            
+        let interaction = serde_json::from_str::<Interaction>(payload).unwrap();
 
-        serde_json::to_string(&response).map_err(Error::JsonFailed)
+        let resp = match interaction {
+            Interaction::Ping(_) => InteractionResponse::Pong,
+
+            Interaction::ApplicationCommand(command) => {
+                handle_command(&self, command.as_ref()).await?
+            }
+
+            _ => InteractionResponse::Pong,
+        };
+
+        serde_json::to_string(&resp).map_err(Error::JsonFailed)
     }
 
     pub(crate) async fn handle_http_request(&self) -> HttpResponse {
         let result = self.perform_verification();
-           
 
         match result {
-            Ok(()) => {match self.handle_payload().await {
-                Ok(response) => HttpResponse {body: response, status: 200},
-                Err(error) => HttpResponse {body: error.to_string(), status: 500}
-            } },
+            Ok(()) => match self.handle_payload().await {
+                Ok(response) => HttpResponse {
+                    body: response,
+                    status: 200,
+                },
+                Err(error) => HttpResponse {
+                    body: error.to_string(),
+                    status: 500,
+                },
+            },
             Err(error) => HttpResponse {
                 body: error.to_string(),
                 status: 500,

@@ -1,8 +1,8 @@
 mod context;
 mod discord;
-mod redis;
 mod error;
 mod http;
+mod redis;
 mod utils;
 
 use cfg_if::cfg_if;

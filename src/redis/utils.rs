@@ -1,6 +1,6 @@
-use crate::redis::error::DiscordJsonSingleError;
-use serde::de::{Deserializer, Deserialize};
 use super::{StdResult, Value};
+use crate::redis::error::DiscordJsonSingleError;
+use serde::de::{Deserialize, Deserializer};
 
 #[allow(clippy::missing_errors_doc)]
 pub fn deserialize_errors<'de, D: Deserializer<'de>>(
