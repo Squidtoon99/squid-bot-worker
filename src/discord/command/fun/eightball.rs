@@ -23,16 +23,19 @@ pub(crate) async fn eightball(ctx: &CommandData) -> Result<InteractionResponse> 
         "My reply is no.",
         "My sources say no.",
         "Outlook not so good.",
-        "Very doubtful."
+        "Very doubtful.",
     ];
 
     let question = match &ctx.options.first().unwrap().value {
         CommandOptionValue::String(a) => a,
-        _ => "The 8ball responds"
+        _ => "The 8ball responds",
     };
     let mut rng = rand::thread_rng();
     let choice = options.choose(&mut rng).unwrap();
-    let e = EmbedBuilder::new().description(choice.to_string()).author(EmbedAuthorBuilder::new().name(question)).build()?;
+    let e = EmbedBuilder::new()
+        .description(choice.to_string())
+        .author(EmbedAuthorBuilder::new().name(question))
+        .build()?;
 
     Ok(InteractionResponse::ChannelMessageWithSource(
         CallbackDataBuilder::new().embeds([e]).build(),

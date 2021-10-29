@@ -1,8 +1,4 @@
-use crate::discord::interaction::{InteractionResponse, InteractionResponseType, InteractionApplicationCommandCallbackData, Interaction};
-use crate::context::Context;
+use crate::discord::command::prelude::*;
 
-pub(crate) async fn messages(context: &Context, data: &Interaction) -> Result<InteractionResponse> {
-    let redis = context.new_redis();
-    let user_id = 
-    //messages = redis.get(format!("MessageCounting.{}:{}:messages"))
+pub(crate) async fn messages(ctx: &CommandData, db: RedisClient) -> Result<InteractionResponse> {
 }

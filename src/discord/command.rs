@@ -15,16 +15,17 @@ use twilight_model::application::callback::InteractionResponse;
 use twilight_util::builder::CallbackDataBuilder;
 
 pub(crate) async fn handle_command(
-    _context: &Context,
+    context: &Context,
     interaction: &ApplicationCommand,
 ) -> Result<InteractionResponse> {
+    let redis = context.new_redis();
     match interaction.data.name.as_str() {
         // Utility
         "ping" => utility::ping(&interaction.data).await,
         // "vote" => utility::vote().await,
         // "afk" => utility::afk(context, data).await,
         // "about" => utility::about().await,
-        // "links" => utility::links().await,
+        "links" => utility::links(&interaction.data).await,
 
         // Fun
         "8ball" => fun::eightball(&interaction.data).await,

@@ -9,6 +9,7 @@ use error::Error as HttpError;
 use reqwest::Method;
 pub type JsonMap = Map<String, Value>;
 
+pub(crate) use client::RedisClient;
 pub use std::result::Result as StdResult;
 
 pub use serde_json::{Map, Number, Value};

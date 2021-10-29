@@ -1,10 +1,9 @@
 mod context;
 mod discord;
-mod error;
+pub mod error;
 mod http;
 mod redis;
 mod utils;
-
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 

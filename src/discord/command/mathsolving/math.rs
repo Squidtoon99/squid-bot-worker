@@ -5,7 +5,7 @@ pub(crate) async fn math(ctx: &ApplicationCommand) -> Result<InteractionResponse
     if let CommandOptionValue::String(expression) = &ctx.data.options.first().unwrap().value {
         let resp = match meval::eval_str(expression) {
             Ok(result) => format!("= `{}`", result),
-            Err(e) => format!("I cannot solve that expression\n{:?}", e)
+            Err(e) => format!("I cannot solve that expression\n{:?}", e),
         };
 
         let a = EmbedAuthorBuilder::new().name(expression).build();
