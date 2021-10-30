@@ -4,11 +4,10 @@ pub mod error;
 mod http;
 mod redis;
 mod utils;
-use cfg_if::cfg_if;
-use wasm_bindgen::prelude::*;
-
 use crate::context::Context;
 use crate::http::HttpResponse;
+use cfg_if::cfg_if;
+use wasm_bindgen::prelude::*;
 
 cfg_if! {
     // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global

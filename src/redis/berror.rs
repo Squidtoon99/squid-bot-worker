@@ -49,21 +49,6 @@ pub enum Error {
     /// [`GuildId::ban`]: crate::model::id::GuildId::ban
     /// [`Member::ban`]: crate::model::guild::Member::ban
     ExceededLimit(String, u32),
-    /// The input is not in the specified range.
-    /// Returned by [`GuildId::members`], [`Guild::members`] and [`PartialGuild::members`]
-    ///
-    /// (param_name, value, range_min, range_max)
-    ///
-    /// [`GuildId::members`]: crate::model::id::GuildId::members
-    /// [`Guild::members`]: crate::model::guild::Guild::members
-    /// [`PartialGuild::members`]: crate::model::guild::PartialGuild::members
-    NotInRange(&'static str, u64, u64, u64),
-    /// Some other error. This is only used for "Expected value <TYPE>" errors,
-    /// when a more detailed error can not be easily provided via the
-    /// [`Error::Decode`] variant.
-    Other(&'static str),
-    /// An error from the [`url`] crate.
-    Url(String),
 
     Http(Box<HttpError>),
 }
@@ -113,14 +98,12 @@ impl From<ReqwestError> for Error {
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::Decode(msg, _) | Error::Other(msg) => f.write_str(msg),
+            Error::Decode(msg, _) => f.write_str(msg),
             Error::ExceededLimit(..) => f.write_str("Input exceeded a limit"),
-            Error::NotInRange(..) => f.write_str("Input is not in the specified range"),
             Error::Format(inner) => fmt::Display::fmt(&inner, f),
             Error::Io(inner) => fmt::Display::fmt(&inner, f),
             Error::Json(inner) => fmt::Display::fmt(&inner, f),
             Error::Num(inner) => fmt::Display::fmt(&inner, f),
-            Error::Url(msg) => f.write_str(msg),
             Error::Http(inner) => fmt::Display::fmt(&inner, f),
         }
     }
