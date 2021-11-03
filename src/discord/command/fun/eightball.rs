@@ -1,7 +1,7 @@
-use crate::discord::command::prelude::*;
+use crate::discord::prelude::*;
 use rand::seq::SliceRandom;
 
-pub(crate) async fn eightball(ctx: &CommandData) -> Result<InteractionResponse> {
+pub(crate) async fn eightball(ctx: &CommandContext) -> CommandResult {
     let options = vec![
         "It is certain.",
         "It is decidedly so.",
@@ -26,7 +26,7 @@ pub(crate) async fn eightball(ctx: &CommandData) -> Result<InteractionResponse> 
         "Very doubtful.",
     ];
 
-    let question = match &ctx.options.first().unwrap().value {
+    let question = match &ctx.arguments().first().unwrap().value {
         CommandOptionValue::String(a) => a,
         _ => "The 8ball responds",
     };

@@ -1,6 +1,6 @@
-use crate::discord::command::prelude::*;
+use crate::discord::prelude::*;
 
-pub(crate) async fn ping(_ctx: &CommandData) -> Result<InteractionResponse> {
+pub(crate) async fn ping(_ctx: &CommandContext) -> Result<InteractionResponse> {
     let e = EmbedBuilder::new()
         .description("[Pong!](https://frisky.dev)".to_string())
         .build()?;

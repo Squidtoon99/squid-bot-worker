@@ -1,4 +1,5 @@
 use crate::discord::verification::VerificationError;
+use crate::redis::Error as RedisError;
 use twilight_embed_builder::EmbedError;
 
 #[derive(Debug, thiserror::Error)]
@@ -20,6 +21,9 @@ pub(crate) enum Error {
 
     #[error("Embed failed to build.")]
     EmbedFailed(EmbedError),
+
+    #[error("Redis command failed.")]
+    RedisCommandFailed(#[from] RedisError),
 }
 
 impl From<EmbedError> for Error {

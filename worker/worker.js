@@ -35,7 +35,6 @@ async function handleRequest(request) {
             },
             type: json.type
         };
-        console.log(context);
         const { status, body } = await wasm_main(context);
         console.log(status, body);
         return new Response(body, {

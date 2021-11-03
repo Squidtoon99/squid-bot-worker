@@ -1,9 +1,11 @@
 mod context;
 mod discord;
 pub mod error;
+pub mod global;
+pub(crate) use error::Error;
 mod http;
 mod redis;
-mod utils;
+pub mod utils;
 use crate::context::Context;
 use crate::http::HttpResponse;
 use cfg_if::cfg_if;
@@ -21,7 +23,7 @@ cfg_if! {
 
 #[wasm_bindgen]
 pub async fn wasm_main(context: JsValue) -> JsValue {
-    JsValue::from_serde(
+    match JsValue::from_serde(
         &(match context.into_serde::<Context>() {
             Ok(ctx) => ctx.handle_http_request().await,
             Err(error) => HttpResponse {
@@ -29,6 +31,8 @@ pub async fn wasm_main(context: JsValue) -> JsValue {
                 body: error.to_string(),
             },
         }),
-    )
-    .unwrap()
+    ) {
+        Ok(v) => v,
+        Err(error) => JsValue::from_str(&error.to_string()),
+    }   
 }

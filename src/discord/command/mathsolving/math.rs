@@ -1,8 +1,8 @@
 extern crate meval;
-use crate::discord::command::prelude::*;
+use crate::discord::prelude::*;
 
-pub(crate) async fn math(ctx: &ApplicationCommand) -> Result<InteractionResponse> {
-    if let CommandOptionValue::String(expression) = &ctx.data.options.first().unwrap().value {
+pub(crate) async fn math(ctx: &CommandContext) -> CommandResult {
+    if let CommandOptionValue::String(expression) = &ctx.arguments().first().unwrap().value {
         let resp = match meval::eval_str(expression) {
             Ok(result) => format!("= `{}`", result),
             Err(e) => format!("I cannot solve that expression\n{:?}", e),

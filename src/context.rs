@@ -1,13 +1,13 @@
 use crate::discord::handle_command;
 use crate::discord::verification::verify_signature;
-use crate::error::Error;
+use crate::Error;
 use crate::http::{HttpRequest, HttpResponse};
 use crate::redis::client::RedisClient;
 use serde::Deserialize;
 use std::collections::HashMap;
 use twilight_model::application::{callback::InteractionResponse, interaction::Interaction};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub(crate) struct Context {
     pub(crate) env: HashMap<String, String>,
     pub(crate) request: HttpRequest,
@@ -40,7 +40,7 @@ impl Context {
         // for (key, value) in self.env.iter() {
         //     env::set_var(key, value)
         // };
-        let interaction = serde_json::from_str::<Interaction>(payload).unwrap();
+        let interaction = serde_json::from_str::<Interaction>(payload)?;
 
         let resp = match interaction {
             Interaction::Ping(_) => InteractionResponse::Pong,

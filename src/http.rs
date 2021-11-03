@@ -5,7 +5,7 @@ use std::fmt;
 
 use crate::error::Error;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, PartialEq)]
 pub(crate) struct HttpRequest {
     pub headers: HashMap<String, String>,
     pub body: String,

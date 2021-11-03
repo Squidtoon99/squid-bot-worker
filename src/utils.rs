@@ -15,3 +15,8 @@ cfg_if! {
         pub fn set_panic_hook() {}
     }
 }
+
+#[macro_export]
+macro_rules! console_log {
+    ($($t:tt)*) => (unsafe { $crate::global::log(&format_args!($($t)*).to_string()) })
+}
