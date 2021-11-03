@@ -19,13 +19,7 @@ impl Context {
             .get(key)
             .ok_or_else(|| Error::EnvironmentVariableNotFound(key.to_string()))
     }
-
-    pub fn new_redis(&self) -> RedisClient {
-        RedisClient::new(
-            String::from(self.env.get("UPSTASH_URI").unwrap_or(&"".to_string())),
-            String::from(self.env.get("UPSTASH_TOKEN").unwrap_or(&"".to_string())),
-        )
-    }
+    
     fn perform_verification(&self) -> Result<(), Error> {
         let public_key = self.env("PUBLIC_KEY")?;
         let signature = self.request.header("x-signature-ed25519")?;

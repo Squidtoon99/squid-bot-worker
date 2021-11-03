@@ -8,7 +8,9 @@ pub(crate) async fn setafk(ctx: &CommandContext) -> CommandResult {
     };
     let redis = ctx.redis();
     if msg != "" {
-        redis.set(format!("afk:{}:{}", ctx.user.unwrap().id, ctx.guild_id.unwrap()), msg).await?;
+        let key = format!("afk:{}:{}", ctx.user.clone().unwrap().id, ctx.guild_id.unwrap());
+
+        redis.set(key.as_str(), msg).await?;
     }
     Ok(InteractionResponse::ChannelMessageWithSource(
         CallbackDataBuilder::new().build(),

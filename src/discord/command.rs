@@ -25,12 +25,12 @@ pub(crate) async fn handle_command(
         // "afk" => utility::afk(context, data).await,
         //&"about" => utility::about(&interaction.data).await,
 
-        //&"links" => utility::links(&ctx).await,
+        "links" => utility::links(&ctx).await,
 
         // Fun
-        //&"8ball" => fun::eightball(&interaction.data).await,
+        "8ball" => fun::eightball(&ctx).await,
         // // Mathsolving
-        //&"math" => mathsolving::math(&interaction).await,
+        "math" => mathsolving::math(&ctx).await,
 
         // // Message Counting
         //&"messages" => messagecounting::messages(&ctx).await,

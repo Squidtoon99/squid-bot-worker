@@ -2,7 +2,7 @@ extern crate meval;
 use crate::discord::prelude::*;
 
 pub(crate) async fn math(ctx: &CommandContext) -> CommandResult {
-    if let CommandOptionValue::String(expression) = &ctx.arguments().first().unwrap().value {
+    if let Some(CommandOptionValue::String(expression)) = &ctx.arguments().first().map(|o| &o.value) {
         let resp = match meval::eval_str(expression) {
             Ok(result) => format!("= `{}`", result),
             Err(e) => format!("I cannot solve that expression\n{:?}", e),

@@ -95,6 +95,9 @@ impl CommandContext {
     }
 
     pub fn redis(&self) -> RedisClient {
-        self.context.new_redis()
+        RedisClient::new(
+            String::from(self.context.env("UPSTASH_URI").unwrap_or(&"".to_string())),
+            String::from(self.context.env("UPSTASH_TOKEN").unwrap_or(&"".to_string())),
+        )
     }
 }
