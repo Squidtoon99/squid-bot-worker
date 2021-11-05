@@ -24,7 +24,6 @@ pub(crate) async fn handle_command(
         // "vote" => utility::vote().await,
         // "afk" => utility::afk(context, data).await,
         //&"about" => utility::about(&interaction.data).await,
-
         "links" => utility::links(&ctx).await,
 
         // Fun

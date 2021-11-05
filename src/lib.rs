@@ -34,5 +34,5 @@ pub async fn wasm_main(context: JsValue) -> JsValue {
     ) {
         Ok(v) => v,
         Err(error) => JsValue::from_str(&error.to_string()),
-    }   
+    }
 }

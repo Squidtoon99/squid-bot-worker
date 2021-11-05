@@ -37,7 +37,7 @@ impl CommandContext {
         // There might be subcommands in the options so we deconstruct them
         // Until I feel stupid enough to nest more than 1 subcommand I'm making this simple on myself
         let mut names = Vec::<String>::new();
-        
+
         names.push(self.data.name.clone());
         if self.is_subcommand() {
             let mut opts = &self.data.options;
@@ -56,7 +56,7 @@ impl CommandContext {
     pub fn data(&self) -> &CommandData {
         &self.data
     }
-    
+
     pub fn is_subcommand(&self) -> bool {
         if let Some(val) = &self.data.options.first().map(|o| &o.value) {
             if let CommandOptionValue::SubCommand(_) = val {

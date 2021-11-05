@@ -1,8 +1,8 @@
 use crate::discord::handle_command;
 use crate::discord::verification::verify_signature;
-use crate::Error;
 use crate::http::{HttpRequest, HttpResponse};
 use crate::redis::client::RedisClient;
+use crate::Error;
 use serde::Deserialize;
 use std::collections::HashMap;
 use twilight_model::application::{callback::InteractionResponse, interaction::Interaction};
@@ -19,7 +19,7 @@ impl Context {
             .get(key)
             .ok_or_else(|| Error::EnvironmentVariableNotFound(key.to_string()))
     }
-    
+
     fn perform_verification(&self) -> Result<(), Error> {
         let public_key = self.env("PUBLIC_KEY")?;
         let signature = self.request.header("x-signature-ed25519")?;
