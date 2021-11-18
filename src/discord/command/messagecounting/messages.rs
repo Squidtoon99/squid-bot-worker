@@ -3,6 +3,16 @@ use serde_json::Value;
 
 pub(crate) async fn messages(ctx: &CommandContext) -> CommandResult {
     let redis = ctx.redis();
+    let user = if let Some(CommandOptionValue::User(u)) = &ctx.arguments().first().map(|o| &o.value)
+    {
+        u
+    } else {
+        ctx.member
+            .expect("Expected member passed with command context")
+            .user
+            .expect("Expected user associated with member object")
+            .id;
+    };
     let messages = match redis
         .get(format!(
             "MessageCounting.{}:{}:messages",
@@ -20,7 +30,7 @@ pub(crate) async fn messages(ctx: &CommandContext) -> CommandResult {
         CallbackDataBuilder::new()
             .embeds([EmbedBuilder::new()
                 .title("Messages")
-                .description(format!("You have sent `{}` messages.", messages))
+                .description(format!("<@{}> has `{}` messages.", messages))
                 .build()?])
             .build(),
     ))

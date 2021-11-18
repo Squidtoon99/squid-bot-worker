@@ -4,7 +4,7 @@ description = "An example of stateless Discord Bot using Slash Commands feature 
 repository = "https://github.com/siketyan/stateless-discord-bot.git"
 license = "MIT"
 version = "0.1.0"
-authors = ["Naoki Ikeguchi <root@siketyan.dev>"]
+authors = ["Squidtoon99 <arjun@squid.pink>", "Naoki Ikeguchi <root@siketyan.dev>"]
 edition = "2021"
 
 [lib]
@@ -16,7 +16,6 @@ default = ["console_error_panic_hook"]
 [dependencies]
 js-sys = "0.3.55"
 cfg-if = "1.0.0"
-worker = "0.0.6"
 ed25519-dalek = "1.0.1"
 hex = "0.4.2"
 serde = { version = "1.0.118", features = ["derive"] }
