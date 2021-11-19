@@ -1,6 +1,6 @@
 use crate::discord::prelude::*;
 
-pub(crate) async fn about(_ctx: &CommandContext) -> CommandResult {
+pub(crate) async fn about(_ctx: &CommandContext<'_>) -> CommandResult {
     Ok(InteractionResponse::ChannelMessageWithSource(
         CallbackDataBuilder::new()
             .embeds([EmbedBuilder::new()

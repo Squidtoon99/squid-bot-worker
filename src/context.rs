@@ -1,72 +1,78 @@
 use crate::discord::handle_command;
+use crate::discord::verification;
 use crate::discord::verification::verify_signature;
-use crate::http::{HttpRequest, HttpResponse};
-use crate::redis::client::RedisClient;
-use crate::Error;
+use crate::Error as CrateError;
+use rocket::http::{HeaderMap, Status};
+use rocket::request::Outcome;
+use rocket::request::{self, FromRequest, Request};
+use rocket::serde::json::Json;
 use serde::Deserialize;
 use std::collections::HashMap;
 use twilight_model::application::{callback::InteractionResponse, interaction::Interaction};
 
-#[derive(Deserialize, Clone)]
-pub(crate) struct Context {
-    pub(crate) env: HashMap<String, String>,
-    pub(crate) request: HttpRequest,
+#[derive(Debug, Clone, PartialEq)]
+pub struct Context<'r> {
+    headers: HeaderMap<'r>,
+    public_key: String,
 }
 
-impl Context {
-    pub fn env(&self, key: &str) -> Result<&String, Error> {
-        self.env
-            .get(key)
-            .ok_or_else(|| Error::EnvironmentVariableNotFound(key.to_string()))
+impl<'r> Context<'r> {
+    pub fn env<S: Into<String>>(&self, key: S) -> Result<String, CrateError> {
+        let x = key.into();
+        std::env::var(&x)
+            .ok()
+            .ok_or_else(|| CrateError::EnvironmentVariableNotFound(x))
     }
 
-    fn perform_verification(&self) -> Result<(), Error> {
-        let public_key = self.env("PUBLIC_KEY")?;
-        let signature = self.request.header("x-signature-ed25519")?;
-        let timestamp = self.request.header("x-signature-timestamp")?;
+    pub fn verify_request(&self, body: String) -> Result<(), verification::VerificationError> {
+        let signature = self
+            .headers
+            .get_one("x-signature-ed25519")
+            .expect("x-signature-ed25519 required");
 
-        verify_signature(public_key, signature, timestamp, &self.request.body)
-            .map_err(Error::VerificationFailed)
+        // sams as above but with "x-signature-timestamp"
+        let timestamp = self
+            .headers
+            .get_one("x-signature-timestamp")
+            .expect("x-signature-timestamp required");
+
+        verify_signature(&self.public_key, signature, timestamp, &body)?;
+
+        Ok(())
     }
 
-    async fn handle_payload(&self) -> Result<String, Error> {
-        let payload = &self.request.body;
-        // for (key, value) in self.env.iter() {
-        //     env::set_var(key, value)
-        // };
-        let interaction = serde_json::from_str::<Interaction>(payload)?;
-
+    pub async fn handle_payload(&self, interaction: Interaction) -> Result<String, CrateError> {
         let resp = match interaction {
             Interaction::Ping(_) => InteractionResponse::Pong,
 
             Interaction::ApplicationCommand(command) => {
-                handle_command(&self, command.as_ref()).await?
+                handle_command(self, command.as_ref()).await?
             }
 
             _ => InteractionResponse::Pong,
         };
-
-        serde_json::to_string(&resp).map_err(Error::JsonFailed)
+        println!("{:#?}", resp);
+        serde_json::to_string(&resp).map_err(CrateError::JsonFailed)
     }
+}
 
-    pub(crate) async fn handle_http_request(&self) -> HttpResponse {
-        let result = self.perform_verification();
+#[async_trait::async_trait]
+impl<'r> FromRequest<'r> for Context<'r> {
+    type Error = CrateError;
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        let public_key = std::env::var("PUBLIC_KEY")
+            .expect("Expected PUBLIC_KEY environment variable to be present");
 
-        match result {
-            Ok(()) => match self.handle_payload().await {
-                Ok(response) => HttpResponse {
-                    body: response,
-                    status: 200,
-                },
-                Err(error) => HttpResponse {
-                    body: error.to_string(),
-                    status: 500,
-                },
-            },
-            Err(error) => HttpResponse {
-                body: error.to_string(),
-                status: 500,
-            },
+        let signature = request.headers().get_one("x-signature-ed25519");
+        let timestamp = request.headers().get_one("x-signature-timestamp");
+
+        if signature.is_none() || timestamp.is_none() {
+            return Outcome::Failure((Status::BadRequest, Self::Error::MissingHeaders));
         }
+
+        Outcome::Success(Context {
+            headers: request.headers().clone(),
+            public_key: public_key,
+        })
     }
 }

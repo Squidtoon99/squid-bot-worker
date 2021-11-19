@@ -1,6 +1,6 @@
 use crate::discord::prelude::*;
 
-pub(crate) async fn links(_ctx: &CommandContext) -> CommandResult {
+pub(crate) async fn links(_ctx: &CommandContext<'_>) -> CommandResult {
     let link_button = Button {
         custom_id: None,
         disabled: false,

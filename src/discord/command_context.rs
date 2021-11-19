@@ -4,8 +4,8 @@ use twilight_model::application::interaction::InteractionType;
 use twilight_model::guild::PartialMember;
 use twilight_model::user::User;
 
-pub(crate) struct CommandContext {
-    context: Context,
+pub struct CommandContext<'a> {
+    context: Context<'a>,
     pub application_id: ApplicationId,
     pub channel_id: ChannelId,
     pub data: CommandData,
@@ -17,8 +17,8 @@ pub(crate) struct CommandContext {
     pub user: Option<User>,
 }
 
-impl CommandContext {
-    pub fn new(ctx: &Context, interaction: &ApplicationCommand) -> Self {
+impl<'a> CommandContext<'a> {
+    pub fn new(ctx: &'a Context, interaction: &ApplicationCommand) -> Self {
         let i = interaction.clone();
         Self {
             context: ctx.clone(),
@@ -87,17 +87,10 @@ impl CommandContext {
         }
     }
 
-    pub fn env(&self, name: &str) -> Option<&String> {
-        match self.context.env(name) {
-            Ok(v) => Some(v),
-            Err(_) => None,
-        }
-    }
-
-    pub fn redis(&self) -> RedisClient {
-        RedisClient::new(
-            String::from(self.context.env("UPSTASH_URI").unwrap_or(&"".to_string())),
-            String::from(self.context.env("UPSTASH_TOKEN").unwrap_or(&"".to_string())),
-        )
-    }
+    // pub fn env(&self, name: &str) -> Option<&String> {
+    //     match self.context.env(name) {
+    //         Ok(v) => Some(&v),
+    //         Err(_) => None,
+    //     }
+    // }
 }

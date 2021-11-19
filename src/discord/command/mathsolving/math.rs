@@ -1,7 +1,7 @@
 extern crate meval;
 use crate::discord::prelude::*;
 
-pub(crate) async fn math(ctx: &CommandContext) -> CommandResult {
+pub(crate) async fn math(ctx: &CommandContext<'_>) -> CommandResult {
     if let Some(CommandOptionValue::String(expression)) = &ctx.arguments().first().map(|o| &o.value)
     {
         let resp = match meval::eval_str(expression) {

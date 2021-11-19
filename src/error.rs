@@ -1,14 +1,13 @@
 use crate::discord::verification::VerificationError;
-use crate::redis::Error as RedisError;
 use twilight_embed_builder::EmbedError;
 
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum Error {
+pub enum Error {
     #[error("Environment variable '{0}' not found.")]
     EnvironmentVariableNotFound(String),
 
-    #[error("Header '{0}' not found.")]
-    HeaderNotFound(String),
+    #[error("Missing the required headers")]
+    MissingHeaders,
 
     #[error("Failed to deserialize from or serialize to JSON.")]
     JsonFailed(#[from] serde_json::Error),
@@ -21,9 +20,6 @@ pub(crate) enum Error {
 
     #[error("Embed failed to build.")]
     EmbedFailed(EmbedError),
-
-    #[error("Redis command failed.")]
-    RedisCommandFailed(#[from] RedisError),
 }
 
 impl From<EmbedError> for Error {

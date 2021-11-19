@@ -13,7 +13,7 @@ use twilight_model::application::callback::InteractionResponse;
 use twilight_util::builder::CallbackDataBuilder;
 
 pub(crate) async fn handle_command(
-    context: &Context,
+    context: &Context<'_>,
     interaction: &ApplicationCommand,
 ) -> Result<InteractionResponse> {
     let ctx = CommandContext::new(context, interaction);

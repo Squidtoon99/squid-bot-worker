@@ -1,7 +1,7 @@
 use crate::discord::prelude::*;
 use rand::seq::SliceRandom;
 
-pub(crate) async fn eightball(ctx: &CommandContext) -> CommandResult {
+pub(crate) async fn eightball(ctx: &CommandContext<'_>) -> CommandResult {
     let options = vec![
         "It is certain.",
         "It is decidedly so.",
